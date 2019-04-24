@@ -2,8 +2,15 @@ package app;
 
 import java.io.IOException;
 import java.util.Scanner;
-
 import org.xml.sax.InputSource;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 
 import app.Customer;
 import app.Employee;
@@ -13,6 +20,7 @@ public class Bank {
 	String employeeID = null;
 	String employeeType = null;
 	static String[] employeeName = null;
+	
 
 	public String getEmployeeID() {
 		return employeeID;
@@ -40,7 +48,45 @@ public class Bank {
 
 	public static void main(String[] args) {	
 
+		String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+		String username = "postgres";
+		String password = "Safety48@@";
+		String sql;
 		
+		try (Connection connection = DriverManager.getConnection(url, username, password)){
+			Scanner scanner = new Scanner(System.in);
+			
+			while(true) {
+				Statement statement = connection.createStatement();
+				System.out.print("sql> ");
+				sql = scanner.nextLine();
+				if (sql.equalsIgnoreCase("quit"))
+					break;
+				
+				boolean isResultSet = statement.execute(sql);
+				
+				if (isResultSet) {
+					ResultSet resultSet = statement.getResultSet();
+					ResultSetMetaData rsmd = resultSet.getMetaData();
+					
+					while (resultSet.next()) {
+						for (int i = 1;i<= rsmd.getColumnCount(); i++) {
+							System.out.print(resultSet.getString(i) + "\t");
+							
+						}
+						
+						System.out.println();
+					}
+					resultSet.close();
+				} else {
+					System.out.println(statement.getUpdateCount() + "rows affected");
+				}
+				
+				statement.close();
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
 // Command Line Arguments
 //		String[] inputs = new String[args.length-1];
 //		for(int i=0;i<args.length-1;i++)
@@ -121,6 +167,6 @@ public class Bank {
 		}
 	
 
-}
 
+}
 
