@@ -5,12 +5,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 
 public class Customer extends Bank{
 	static String firstName;
 	static String lastName;
+	static String email;
+//	static String password;
 	
 	public static void printWelcome() {
 
@@ -26,14 +34,7 @@ public class Customer extends Bank{
 // Gather First Name
 		System.out.println("First Name: ");
 		String firstName = infoScanner.nextLine();
-		try {
-			Customer.printToFile(firstName);
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		
-// Gather Last Name
+		// Gather Last Name
 		System.out.println("Last Name: ");
 		String lastName = infoScanner.nextLine();
 		try {
@@ -65,16 +66,17 @@ public class Customer extends Bank{
 		}
 		
 		
-		Scanner logInfoScanner = new Scanner(System.in);
+//		Scanner logInfoScanner = new Scanner(System.in);
+		
 // Gather Email
 		int a = 0;
-		
+		String email = null;
 		while (a == 0) {
 		System.out.println("Email: ");
-		String email = logInfoScanner.nextLine();
+		email = infoScanner.nextLine();
 		
 		System.out.println("Confirm Email: ");
-		String emailConfirm = logInfoScanner.nextLine();
+		String emailConfirm = infoScanner.nextLine();
 		if(email.equalsIgnoreCase(emailConfirm)) {
 			try {
 				Customer.printToFile(email);
@@ -90,16 +92,17 @@ public class Customer extends Bank{
 		
 // Gather Password
 		int b = 0;
+		String p4ssword;
 		
 		while (b == 0) {
 			System.out.println("Password: ");
-			String password = logInfoScanner.nextLine();
+			p4ssword = infoScanner.nextLine();
 			
 			System.out.println("Confirm Password: ");
-			String passwordConfirm = logInfoScanner.nextLine();
-			if(password.equalsIgnoreCase(passwordConfirm)) {
+			String passwordConfirm = infoScanner.nextLine();
+			if(p4ssword.equalsIgnoreCase(passwordConfirm)) {
 				try {
-					Customer.printToFile(password);
+					Customer.printToFile(p4ssword);
 					BufferedWriter writer = new BufferedWriter(new FileWriter("Customers.txt", true));
 					writer.newLine();
 					writer.close();
@@ -113,11 +116,83 @@ public class Customer extends Bank{
 			else
 				System.out.println("Passwords Do Not Match");
 		
-		}
+		//}
 		Bank.clearScreen();
-		System.out.println("Thank You, Please Allow 24 Hours For Approval Processing");
 		
-	}
+		String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+		String username = "postgres";
+		String password = "Safety48@@";
+		String sql;
+		
+		try (Connection connection = DriverManager.getConnection(url, username, password)){
+			Scanner scanner1 = new Scanner(System.in);
+			
+			//while(true) {
+				Statement statement = connection.createStatement();
+				
+		String customer;
+		
+		customer= "INSERT INTO Customers (fname,lname,birthdate,social,email,password)" + 
+				"VALUES ('"+firstName+"','"+lastName+"','"+birthDay+"','"+socialNumber+"','"+email+"','"+p4ssword+"');";
+		
+		
+		
+		if (customer.equalsIgnoreCase("quit"))
+			break;
+		
+//		int i=0;
+//		while (i<6) {
+		
+		int isResultSet = statement.executeUpdate(customer);
+		
+//		i++
+		}
+//		if (isResultSet) {
+//			ResultSet resultSet = statement.getResultSet();
+//			ResultSetMetaData rsmd = resultSet.getMetaData();			
+//			
+//			while (resultSet.next()) {
+//				EmployeeID = resultSet.getString(1);
+//				EmployeeFirstName = resultSet.getString(2);
+//				EmployeeLastName = resultSet.getString(3);
+//				EmployeeType = resultSet.getString(4);
+////				System.out.println(EmployeeID);
+////				System.out.println(EmployeeFirstName);
+////				System.out.println(EmployeeLastName);
+////				System.out.println(EmployeeType);
+//				
+//				for (int i = 1;i<= rsmd.getColumnCount(); i++) {
+//					//System.out.print(resultSet.getString(i) + "\t");
+//				
+//				loginLooper = 1;
+//				}
+//				
+//				System.out.println();
+//				clearScreen();
+//				System.out.println("Welcome Back " + EmployeeFirstName + " " + EmployeeLastName);
+//				System.out.println("Current Permissions: " + EmployeeType );
+//			}
+			//resultSet.close();
+//		} else {
+//			System.out.println(statement.getUpdateCount() + "rows affected");
+//		}
+ catch (SQLException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
+		
+		//statement.close();
+		
+	//}
+		
+		System.out.println("Thank You, Please Allow 24 Hours For Approval Processing");
+}
+	}//catch (SQLException ex) {
+	//ex.printStackTrace();
+//}
+		
+		
+	//}
 
 	private static void printToFile(String text) throws IOException {
 	    BufferedWriter writer = new BufferedWriter(new FileWriter("Customers.txt", true));
@@ -127,21 +202,21 @@ public class Customer extends Bank{
 	    writer.close();
 	}
 
-	public static String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+//	public static String getFirstName() {
+//		return firstName;
+//	}
+//
+//	public void setFirstName(String firstName) {
+//		this.firstName = firstName;
+//	}
+//
+//	public String getLastName() {
+//		return lastName;
+//	}
+//
+//	public void setLastName(String lastName) {
+//		this.lastName = lastName;
+	//}
 
 	public static void loginCustomer() {
 		String name;
@@ -163,13 +238,66 @@ public class Customer extends Bank{
 		System.out.println("Email:");
 		//String userName = loginScanner.nextLine();
 		
-		try {
-			loginLooper = searchForName(loginLooper);
+		//try {
+			//loginLooper = searchForName(loginLooper);
+			String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+			String username = "postgres";
+			String password = "Safety48@@";
+			String sql;
 			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			try (Connection connection = DriverManager.getConnection(url, username, password)){
+				Scanner scanner = new Scanner(System.in);
+				
+				//while(true) {
+					Statement statement = connection.createStatement();
+					//System.out.print("sql> ");
+					sql = "select * from customers where email =('" + scanner.nextLine()+"')";
+					//select * from customers where email =('Shaun_Gordon@baylor.edu')
+					if (sql.equalsIgnoreCase("quit"))
+						break;
+					
+					boolean isResultSet = statement.execute(sql);
+					
+					if (isResultSet) {
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();			
+						
+						while (resultSet.next()) {
+							firstName = resultSet.getString(0);
+							lastName = resultSet.getString(1);
+							email = resultSet.getString(4);
+							//EmployeeType = resultSet.getString(4);
+//							System.out.println(EmployeeID);
+//							System.out.println(EmployeeFirstName);
+//							System.out.println(EmployeeLastName);
+//							System.out.println(EmployeeType);
+							
+//							for (int i = 1;i<= rsmd.getColumnCount(); i++) {
+//								//System.out.print(resultSet.getString(i) + "\t");
+//							
+//							loginLooper = 1;
+//							}
+							
+							System.out.println();
+							clearScreen();
+							System.out.println("Welcome Back " + firstName + " " + lastName);
+							//System.out.println("Current Permissions: " + EmployeeType );
+						}
+						resultSet.close();
+					} else {
+						System.out.println(statement.getUpdateCount() + "rows affected");
+					}
+					
+					statement.close();
+				//}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		if( loginLooper == 0) {
 			System.out.println("Password:");
