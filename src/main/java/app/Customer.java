@@ -132,8 +132,8 @@ public class Customer extends Bank{
 				
 		String customer;
 		
-		customer= "INSERT INTO Customers (fname,lname,birthdate,social,email,password)" + 
-				"VALUES ('"+firstName+"','"+lastName+"','"+birthDay+"','"+socialNumber+"','"+email+"','"+p4ssword+"');";
+		customer= "INSERT INTO Customers (fname,lname,birthdate,social,email,password,status)" + 
+				"VALUES ('"+firstName+"','"+lastName+"','"+birthDay+"','"+socialNumber+"','"+email+"','"+p4ssword+"','Pending');";
 		
 		
 		
@@ -244,6 +244,7 @@ public class Customer extends Bank{
 			String username = "postgres";
 			String password = "Safety48@@";
 			String sql;
+			String statusL;
 			
 			try (Connection connection = DriverManager.getConnection(url, username, password)){
 				Scanner scanner = new Scanner(System.in);
@@ -252,20 +253,33 @@ public class Customer extends Bank{
 					Statement statement = connection.createStatement();
 					//System.out.print("sql> ");
 					sql = "select * from customers where email =('" + scanner.nextLine()+"')";
+					//statusL = "select status from customers where status =('" + scanner.nextLine()+"')";
+					
 					//select * from customers where email =('Shaun_Gordon@baylor.edu')
 					if (sql.equalsIgnoreCase("quit"))
 						break;
 					
 					boolean isResultSet = statement.execute(sql);
+					ResultSet resultSet = statement.getResultSet();
+					ResultSetMetaData rsmd = resultSet.getMetaData();
 					
-					if (isResultSet) {
-						ResultSet resultSet = statement.getResultSet();
-						ResultSetMetaData rsmd = resultSet.getMetaData();			
-						
+					if (isResultSet) {			
+					
 						while (resultSet.next()) {
-							firstName = resultSet.getString(0);
-							lastName = resultSet.getString(1);
+							firstName = resultSet.getString(1);
+							lastName = resultSet.getString(2);
 							email = resultSet.getString(4);
+							String status = resultSet.getString(7);
+							
+							if (status.equalsIgnoreCase("Pending"))
+							{
+								System.out.println("Your Account is Currently Pending Activation");
+								System.out.println();
+								System.out.println(" Please Try Again Later");
+								restart = "yes";
+								loginLooper++;
+								break;
+							}
 							//EmployeeType = resultSet.getString(4);
 //							System.out.println(EmployeeID);
 //							System.out.println(EmployeeFirstName);
@@ -274,13 +288,13 @@ public class Customer extends Bank{
 							
 //							for (int i = 1;i<= rsmd.getColumnCount(); i++) {
 //								//System.out.print(resultSet.getString(i) + "\t");
-//							
+//							 
 //							loginLooper = 1;
 //							}
 							
 							System.out.println();
 							clearScreen();
-							System.out.println("Welcome Back " + firstName + " " + lastName);
+							System.out.println("Welcome Back " + firstName + " " + lastName + " "+ status);
 							//System.out.println("Current Permissions: " + EmployeeType );
 						}
 						resultSet.close();
