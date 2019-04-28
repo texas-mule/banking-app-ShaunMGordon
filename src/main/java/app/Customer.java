@@ -202,6 +202,7 @@ public class Customer extends Bank{
 	    writer.close();
 	}
 
+
 //	public static String getFirstName() {
 //		return firstName;
 //	}
@@ -280,6 +281,37 @@ public class Customer extends Bank{
 								loginLooper++;
 								break;
 							}
+							
+							if (status.equalsIgnoreCase("Active"))
+							{
+								System.out.println("Your Account is Currently Active");
+								System.out.println();
+								System.out.println(" Please Enter Your Password");
+								
+		
+										//System.out.print("sql> ");
+										sql = "select * from customers where email =('" + scanner.nextLine()+"')";
+										//statusL = "select status from customers where status =('" + scanner.nextLine()+"')";
+										
+										//select * from customers where email =('Shaun_Gordon@baylor.edu')
+										if (sql.equalsIgnoreCase("quit"))
+											break;
+										
+										isResultSet = statement.execute(sql);
+										resultSet = statement.getResultSet();
+										rsmd = resultSet.getMetaData();
+										
+										if (isResultSet) {			
+										
+											while (resultSet.next()) {
+												firstName = resultSet.getString(1);
+												lastName = resultSet.getString(2);
+												email = resultSet.getString(4);
+												status = resultSet.getString(7);
+											}
+								loginLooper++;
+								
+							}
 							//EmployeeType = resultSet.getString(4);
 //							System.out.println(EmployeeID);
 //							System.out.println(EmployeeFirstName);
@@ -297,74 +329,83 @@ public class Customer extends Bank{
 							System.out.println("Welcome Back " + firstName + " " + lastName + " "+ status);
 							//System.out.println("Current Permissions: " + EmployeeType );
 						}
-						resultSet.close();
-					} else {
-						System.out.println(statement.getUpdateCount() + "rows affected");
-					}
+						//resultSet.close();
+					} 
 					
-					statement.close();
+					//statement.close();
 				//}
-			} catch (SQLException ex) {
+						}
+					} catch (SQLException ex) {
 				ex.printStackTrace();
-			}
+						}
+	}
+}
+}
 			
 //		} catch (FileNotFoundException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		
-		if( loginLooper == 0) {
-			System.out.println("Password:");
-			 try {
-				loginLooper = searchForPassword(loginLooper);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-//		 String passWord = loginScanner.nextLine();
-//		 loginScanner.close();
-		}
-		}
-		
-	}
+
+//			FILE SYSTEM
+			
+//		if( loginLooper == 0) {
+//			System.out.println("Password:");
+//			 try {
+//				loginLooper = searchForPassword(loginLooper);
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+////		 String passWord = loginScanner.nextLine();
+////		 loginScanner.close();
+//		}
 	
-	public static int searchForName(int x) throws FileNotFoundException {
-		// New File
-		    File file = new File("Customers.txt");
-		    
-		//New Scanner For Input
-		    Scanner userInput = new Scanner(System.in);
-		
-		// New Scanner For File
-		    Scanner input = new Scanner(file);
-		    
-		// Sets Name Equal to Console Input
-		    String name = userInput.nextLine();
-		    String userName = " ";
-		    String[] iName;
-		    
-		// Sets iName Equal to File Input
-		    while (input.hasNextLine() && name.equalsIgnoreCase(userName) != true) {
-		    	String customerInfo;
-		    	customerInfo = input.nextLine();
-		    	iName = customerInfo.split(" ");
-		    	userName = iName[5];
-		    	//System.out.println(iName);
-		    }
-		    
-		    if(name.equalsIgnoreCase(userName)) {
-		    	x = 0;
-		    }
-		    else {
-		    	System.out.println("Not Found");
-		    	x++;
-		    	
-		    }
-		   
-		    //System.out.println(name);
-		    
-		    return x;
-		}
+//	FILE SYSTEM
+	
+//	public static int searchForName(int x) throws FileNotFoundException {
+//		// New File
+//		    File file = new File("Customers.txt");
+//		    
+//		//New Scanner For Input
+//		    Scanner userInput = new Scanner(System.in);
+//		
+//		// New Scanner For File
+//		    Scanner input = new Scanner(file);
+//		    
+//		// Sets Name Equal to Console Input
+//		    String name = userInput.nextLine();
+//		    String userName = " ";
+//		    String[] iName;
+//		    
+//		// Sets iName Equal to File Input
+//		    while (input.hasNextLine() && name.equalsIgnoreCase(userName) != true) {
+//		    	String customerInfo;
+//		    	customerInfo = input.nextLine();
+//		    	iName = customerInfo.split(" ");
+//		    	userName = iName[5];
+//		    	//System.out.println(iName);
+//		    }
+//		    
+//		    if(name.equalsIgnoreCase(userName)) {
+//		    	x = 0;
+//		    }
+//		    else {
+//		    	System.out.println("Not Found");
+//		    	x++;
+//		    	
+//		    }
+//		   
+//		    //System.out.println(name);
+//		    
+//		    return x;
+//		}
+	
+	
+// FILE SYSTEM
+	
+	
+	/*
 	
 	public static int searchForPassword(int x) throws FileNotFoundException {
 		// New File
@@ -386,7 +427,7 @@ public class Customer extends Bank{
 		    	String customerInfo;
 		    	customerInfo = input.nextLine();
 		    	iPassword = customerInfo.split(" ");
-		    	uPassWord = iPassword[6];
+		    	uPassWord = iPassword[5];
 		    	//System.out.println(iName);
 		    }
 		    
@@ -414,3 +455,5 @@ public class Customer extends Bank{
 			}
 
 }
+*/
+	

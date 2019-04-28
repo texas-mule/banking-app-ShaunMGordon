@@ -60,6 +60,7 @@ public class Employee extends Bank {
 					System.out.println(i);
 					System.out.println("empID:");
 					
+					
 				}
 				else if(i==3) {
 					clearScreen();
@@ -98,21 +99,12 @@ public class Employee extends Bank {
 								EmployeeFirstName = resultSet.getString(2);
 								EmployeeLastName = resultSet.getString(3);
 								EmployeeType = resultSet.getString(4);
-//								System.out.println(EmployeeID);
-//								System.out.println(EmployeeFirstName);
-//								System.out.println(EmployeeLastName);
-//								System.out.println(EmployeeType);
-								
-								for (int i = 1;i<= rsmd.getColumnCount(); i++) {
-									//System.out.print(resultSet.getString(i) + "\t");
-								
-								loginLooper = 1;
-								}
 								
 								System.out.println();
 								clearScreen();
 								System.out.println("Welcome Back " + EmployeeFirstName + " " + EmployeeLastName);
 								System.out.println("Current Permissions: " + EmployeeType );
+								loginLooper = 1;
 							}
 							resultSet.close();
 						} else {
@@ -124,72 +116,16 @@ public class Employee extends Bank {
 				} catch (SQLException ex) {
 					ex.printStackTrace();
 				}
+				
 			}
-			
-			//System.out.println(loginLooper);}
-	
-			//System.out.println("Welcome Back" + empName);
-			
 			
 		}
 	
-//	public static int searchForEmployeeID(int x) throws FileNotFoundException {
-//		// New File
-//		    File file = new File("Employees.txt");
-//		    
-//		//New Scanner For Input
-//		    Scanner userInput = new Scanner(System.in);
-//		
-//		// New Scanner For File
-//		    Scanner input = new Scanner(file);
-//		    
-//		// Sets Name Equal to Console Input
-//		    String name = userInput.nextLine();
-//		    String userName = " ";
-//		    String[] iName ;
-//		    String[] empName = {"",""};
-//		    
-//		// Sets iName Equal to File Input
-//		    while (input.hasNextLine() && name.equalsIgnoreCase(userName) != true) {
-//		    	String customerInfo;
-//		    	customerInfo = input.nextLine();
-//		    	iName = customerInfo.split(" ");
-//		    	userName = iName[0];
-//		    	empName[0]= iName[2];
-//		    	empName[1] = iName[3];
-//		   
-////		    	System.out.println(userName);
-//		    	//System.out.println(iName);
-//		    }
-//		    
-//		    if(name.equalsIgnoreCase(userName)) {
-//		    	//System.out.println(empName);
-//		    	clearScreen();
-//		    	System.out.println("Welcome Back " + empName[0] + " " + empName[1]);
-//		    	String[] employeeDisplayName = empName;
-//		    	//System.out.println(employeeDisplayName);
-//		    	Bank.setEmployeeName(employeeDisplayName);
-//		    	x = 1;
-//		    }
-//		    else if(i==2) {
-//		    	clearScreen();
-//		    	System.out.println("Final Attempt");
-//		    	System.out.println("empID:");
-//		    	x=0;
-//		    	
-//		    }
-//		    else if (i>2) {
-//		    	clearScreen();
-//		    	System.out.println("We Could Not Verify That ID Number\nGoodbye");
-//		    	x=0;
-//		    } 
-//		   
-//		    //System.out.println(name);
-//		    //System.out.println(x);
-//		    return x;
-//		}
+
 		
 		
 
 }
+
+
 
