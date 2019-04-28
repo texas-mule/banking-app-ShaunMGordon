@@ -7,6 +7,7 @@ package app;
  */
 
 import java.util.Scanner;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -29,6 +30,8 @@ public class Bank extends Object{
 	static String EmployeeLastName;
 	static String EmployeeType;
 	static String restart = "no";
+	public static int bankID;
+	static int userID;
 	
 	static String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
 	static String username = "postgres";
@@ -70,9 +73,87 @@ public class Bank extends Object{
 			if(x==1) {
 				employeeInterface();
 			}
+			
+			if(x==2) {
+				Scanner sc = new Scanner(System.in);
+				int option1 = sc.nextInt();
+				
+				if(option1 == 1) {
+					userID = Customer.loginCustomer();
+					
+					// Options
+					System.out.println("Please Select From The Following Options");
+					System.out.println("1. Display all currently active accounts");
+					System.out.println("2. Apply for a new account");
+					System.out.println("3. Initiate a Transfer");
+					
+					Scanner customerDecider = new Scanner(System.in);
+					int cDecider = customerDecider.nextInt();
+					
+					if(cDecider == 1) {
+						displayCustomerCurrentAccounts();
+						
+					}
+			
+				}
+				else
+				{
+					Customer.registerCustomer();
+					
+				}
+			}
+			
 		}
 		
 		
+	}
+
+	private static void displayCustomerCurrentAccounts() {
+		int currentAccounts= 0;
+		
+		try (Connection connection = DriverManager.getConnection(url, username, password)){
+			Statement statement = connection.createStatement();
+			sql = "select * from accounts where userID = "+userID+"";
+		
+			boolean isResultSet = statement.execute(sql);
+		
+			if (isResultSet) {
+				clearScreen();
+				ResultSet resultSet = statement.getResultSet();
+				ResultSetMetaData rsmd = resultSet.getMetaData();
+				System.out.print("Account"+"\t");
+				System.out.print("Type"+"\t");
+				System.out.print("\t"+"Balance"+"\t");
+				System.out.print("\t"+"Status"+"\t");
+				System.out.println();
+				System.out.println();
+			
+				while (resultSet.next()) {
+					int accountnumber= resultSet.getInt(1);
+					String accounttype = resultSet.getString(2);
+					BigDecimal accountbalance = resultSet.getBigDecimal(3);
+					String accountStatus = resultSet.getString(4);
+					System.out.print(accountnumber);
+					System.out.print("\t"+accounttype);
+					System.out.print("\t"+accountbalance+"\t");
+					System.out.print("\t"+accountStatus);
+					
+					System.out.println();
+					System.out.println("--------------------------------------------------------------------------------");
+					currentAccounts = resultSet.getRow();
+										}
+					resultSet.close();
+					
+							} 
+		
+				statement.close();
+																							} 
+		catch (SQLException ex) {
+			
+				ex.printStackTrace();
+				
+								}
+		System.out.println("\nYou currently have " + currentAccounts + " active accounts");
 	}
 
 	private static void employeeInterface() {		
@@ -215,6 +296,31 @@ public class Bank extends Object{
 		if(empDecision.equalsIgnoreCase("approve")) {
 			
 			approvePending(p2Decider);
+			
+			// Set Up Customer Bank Account
+			try (Connection connection = DriverManager.getConnection(url, username, password)){
+				Scanner scanner1 = new Scanner(System.in);
+				
+				//while(true) {
+					Statement statement = connection.createStatement();
+					
+			String customer;
+			
+			customer= "INSERT INTO accounts("
+					+"type, balance, status, userid)"
+					+ "VALUES ('Checking', 0.00,'Active',"+bankID+")";
+			
+			
+			
+			int isResultSet = statement.executeUpdate(customer);
+			
+			}
+
+	 catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+			
 													}
 		// Deny Functionality
 		
@@ -306,7 +412,7 @@ public class Bank extends Object{
 								}
 	}
 
-	private static void selectPendingAccount(String p2Decider) {
+	private static int selectPendingAccount(String p2Decider) {
 		try (Connection connection = DriverManager.getConnection(url, username, password)){
 			Statement statement = connection.createStatement();
 			sql = "select * from customers where fname = " + "'"+p2Decider+"'";
@@ -324,6 +430,8 @@ public class Bank extends Object{
 					String lastName = resultSet.getString(2);
 					String customerEmail = resultSet.getString(5);
 					String customerStatus = resultSet.getString(7);
+					bankID= resultSet.getInt(8);
+					
 					int flength= firstName.length();
 					if (flength < 10) {
 						for(int i =0;i<=(10-flength);i++)
@@ -349,6 +457,7 @@ public class Bank extends Object{
 				ex.printStackTrace();
 				
 								}
+		return bankID;
 	}
 
 	private static void displayPendingAccounts() {
@@ -435,7 +544,6 @@ public class Bank extends Object{
 // If yes, connect to Employee Version
 				employeeWelcome();
 				Employee employee = new Employee();
-				
 				x = 1;
 			}
 			else if(decider.equalsIgnoreCase(customerDecider)){
@@ -462,20 +570,6 @@ public class Bank extends Object{
 	public static void customerWelcome() {
 		clearScreen();
 		Customer.printWelcome();
-		
-		Scanner sc = new Scanner(System.in);
-		int option1 = sc.nextInt();
-		
-		if(option1 == 1) {
-			Customer.loginCustomer();
-	
-		}
-		else
-		{
-			System.out.println(option1);
-			Customer.registerCustomer();
-			
-		}
 		
 	}
 	

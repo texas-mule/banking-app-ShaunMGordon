@@ -1,8 +1,5 @@
 package app;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream.GetField;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -16,24 +13,6 @@ public class Employee extends Bank {
 		static int loginLooper;
 		static int attemptCounter;
 		static int i= -1;
-		
-		
-//	public int getLoginLooper() {
-//			return loginLooper;
-//		}
-//
-//	public static void setLoginLooper(int loginLooper) {
-//			Employee.loginLooper = loginLooper;
-//			System.out.println(loginLooper);
-//		}
-//
-//	public int getAttemptCounter() {
-//			return attemptCounter;
-//		}
-//
-//	public static void setAttemptCounter(int attemptCounter) {
-//			Employee.attemptCounter = attemptCounter;
-//		}
 
 	public static void employeeWelcome() {
 		loginLooper=0;
@@ -120,10 +99,6 @@ public class Employee extends Bank {
 			}
 			
 		}
-	
-
-		
-		
 
 }
 
