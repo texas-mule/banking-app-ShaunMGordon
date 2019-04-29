@@ -73,7 +73,7 @@ public class Bank extends Object implements CustomerInterface{
 			}
 			
 			// Initiate Employee Interface
-			if(x==1) {
+			if(x==1 && EmployeeType!=null) {
 				employeeInterface();
 			}
 			
@@ -465,11 +465,105 @@ public class Bank extends Object implements CustomerInterface{
 			
 			
 			if (AllowedAction == 1) {
-				int input=0;
-				displayActiveAccounts();
-				System.out.println("\nWould you like to return to the main menu?");
-				empcont = empScan.nextLine();
+				String viewMoreAccounts="yes";
+			
+				while(viewMoreAccounts.equalsIgnoreCase("yes")){
+					
 				
+				displayActiveUserAccounts();
+				System.out.println("\nAllowed Actions: ");
+				System.out.println("1. View Account Detailed Information");
+				System.out.println("2. Return to Main Menu");
+				int allowedActiveActions = empScan.nextInt();
+				if(allowedActiveActions==1) {
+					
+					System.out.println("Which User Account would you like to select");
+					int activeUserID = scanner.nextInt();
+					
+					int currentAccounts= 0;
+					ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+					
+					try (Connection connection = DriverManager.getConnection(url, username, password)){
+						Statement statement = connection.createStatement();
+						sql = "select * from accounts where "+activeUserID+" = ANY (userid) AND status = 'Active'";
+					
+						//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+						
+						boolean isResultSet = statement.execute(sql);
+						clearScreen();
+						if (isResultSet) {
+							ResultSet resultSet = statement.getResultSet();
+							ResultSetMetaData rsmd = resultSet.getMetaData();
+							System.out.print("Account"+"\t");
+							System.out.print("Type"+"\t");
+							System.out.print("\t"+"Balance"+"\t");
+							System.out.print("\t"+"Status"+"\t");
+							System.out.println();
+							System.out.println();
+							
+							int i=0;
+							
+							while (resultSet.next()) {
+								
+								int accountnum = resultSet.getInt(1);
+								String accounttype = resultSet.getString(2);
+								BigDecimal accountbalance = resultSet.getBigDecimal(3);
+								String accountStatus = resultSet.getString(4);
+								System.out.print(accountnum);
+								System.out.print("\t"+accounttype);
+								System.out.print("\t"+accountbalance+"\t");
+								System.out.print("\t"+accountStatus);
+
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+								currentAccounts = resultSet.getRow();
+								//System.out.println(accountnum);
+								accountNumbers.add(accountnum);
+													}
+								resultSet.close();
+										}
+						sql = "select * from customers where bankID = "+activeUserID+"";
+						
+						//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+						
+						statement.execute(sql);
+						
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();
+						
+						while (resultSet.next()) {
+							String firstName = resultSet.getString(1);
+							String lastName = resultSet.getString(2);
+							int userID= resultSet.getInt(8);
+							int flength= firstName.length();
+							if (flength < 10) {
+								for(int i =0;i<=(10-flength);i++)
+									firstName= firstName + " ";
+							}
+
+							System.out.print("\nCurrently Viewing Accounts For: \t");
+							System.out.print(userID+"\t");
+							System.out.print(firstName+" ");
+							System.out.print(lastName);
+							
+												}
+						
+					
+																										} 
+					catch (SQLException ex) {
+						
+							ex.printStackTrace();
+							
+											}
+					System.out.println("\n\nWould you like view more active accounts?");
+					Scanner activeScan = new Scanner(System.in);
+					viewMoreAccounts = activeScan.nextLine();
+				}
+				
+				
+				if(allowedActiveActions==2)
+					empcont="yes";
+				}
 			}
 			
 			else if (AllowedAction == 2) {
@@ -512,7 +606,7 @@ public class Bank extends Object implements CustomerInterface{
 		
 		if (AllowedAction == 1) {
 			
-			displayActiveAccounts();
+			displayActiveUserAccounts();
 			
 		}
 		
@@ -706,7 +800,7 @@ if(empDecision.equalsIgnoreCase("deny")) {
 											}
 	}
 
-	private static void displayActiveAccounts() {
+	private static void displayActiveUserAccounts() {
 		int activeAccounts= 0;
 		
 		try (Connection connection = DriverManager.getConnection(url, username, password)){
@@ -726,13 +820,20 @@ if(empDecision.equalsIgnoreCase("deny")) {
 					String lastName = resultSet.getString(2);
 					String customerEmail = resultSet.getString(5);
 					String customerStatus = resultSet.getString(7);
+					int userID= resultSet.getInt(8);
 					int flength= firstName.length();
 					if (flength < 10) {
 						for(int i =0;i<=(10-flength);i++)
 							firstName= firstName + " ";
 					}
+					System.out.print("UserID" +"  ");
+					System.out.print("First Name\t");
+					System.out.print("Last Name");
+					System.out.print("\t"+"Email"+"\t\t");
+					System.out.print("\t"+"\t"+"Status\n\n");
 					
-					System.out.print(firstName);
+					System.out.print(userID+"\t");
+					System.out.print(firstName+"\t");
 					System.out.print(lastName);
 					System.out.print("\t"+"\t"+customerEmail);
 					System.out.print("\t"+"\t"+customerStatus);
@@ -754,7 +855,61 @@ if(empDecision.equalsIgnoreCase("deny")) {
 								}
 		System.out.println("\nThere are currently " + activeAccounts + " activated accounts");
 	}
-
+	private static void displayActiveUserBankAccounts(int activeUserId) {
+		int activeAccounts= 0;
+		
+		try (Connection connection = DriverManager.getConnection(url, username, password)){
+			Statement statement = connection.createStatement();
+			sql = "select * from customers where userID = " + ""+activeUserId+"";
+		
+			boolean isResultSet = statement.execute(sql);
+		
+			if (isResultSet) {
+				clearScreen();
+				ResultSet resultSet = statement.getResultSet();
+				ResultSetMetaData rsmd = resultSet.getMetaData();
+				
+			
+				while (resultSet.next()) {
+					String firstName = resultSet.getString(1);
+					String lastName = resultSet.getString(2);
+					String customerEmail = resultSet.getString(5);
+					String customerStatus = resultSet.getString(7);
+					int userID= resultSet.getInt(8);
+					int flength= firstName.length();
+					if (flength < 10) {
+						for(int i =0;i<=(10-flength);i++)
+							firstName= firstName + " ";
+					}
+					System.out.print("UserID" +"  ");
+					System.out.print("First Name\t");
+					System.out.print("Last Name");
+					System.out.print("\t"+"Email"+"\t\t");
+					System.out.print("\t"+"\t"+"Status\n\n");
+					
+					System.out.print(userID+"\t");
+					System.out.print(firstName+"\t");
+					System.out.print(lastName);
+					System.out.print("\t"+"\t"+customerEmail);
+					System.out.print("\t"+"\t"+customerStatus);
+					
+					System.out.println();
+					System.out.println("--------------------------------------------------------------------------------");
+					activeAccounts = resultSet.getRow();
+										}
+					resultSet.close();
+					
+							} 
+		
+				statement.close();
+																							} 
+		catch (SQLException ex) {
+			
+				ex.printStackTrace();
+				
+								}
+		System.out.println("\nThere are currently " + activeAccounts + " activated accounts");
+	}
 	private static void denyPending(String p2Decider) {
 		try (Connection connection = DriverManager.getConnection(url, username, password)){
 			Statement statement = connection.createStatement();
