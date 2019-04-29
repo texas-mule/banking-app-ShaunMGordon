@@ -10,13 +10,30 @@ import java.util.Scanner;
 
 
 public class Customer extends Bank{
-	static String firstName;
-	static String lastName;
+	private String firstName;
+	private String lastName;
 	static String email;
 	static String registeredPassword;
 	static String status;
 	static int userID;
 	
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
 	public static void printWelcome() {
 
 		System.out.println("Please Select From The Following Options:");
@@ -121,13 +138,8 @@ public class Customer extends Bank{
 		System.out.println("Thank You, Please Allow 24 Hours For Approval Processing");
 }
 	}//catch (SQLException ex) {
-	//ex.printStackTrace();
-//}
-		
-		
-	//}
 
-	public static int loginCustomer() {
+	public int loginCustomer() {
 		String name;
 		int loginLooper=0;
 		int attemptCounter=0;
@@ -145,10 +157,7 @@ public class Customer extends Bank{
 			}
 			
 		System.out.println("Email:");
-		//String userName = loginScanner.nextLine();
-		
-		//try {
-			//loginLooper = searchForName(loginLooper);
+
 			String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
 			String username = "postgres";
 			String password = "Safety48@@";
@@ -175,8 +184,9 @@ public class Customer extends Bank{
 					if (isResultSet) {			
 					
 						while (resultSet.next()) {
-							firstName = resultSet.getString(1);
-							lastName = resultSet.getString(2);
+							
+							this.firstName= resultSet.getString(1);
+							this.lastName = resultSet.getString(2);
 							email = resultSet.getString(4);
 							registeredPassword = resultSet.getString(6);
 							status = resultSet.getString(7);
