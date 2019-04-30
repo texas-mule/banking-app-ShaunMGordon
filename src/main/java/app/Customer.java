@@ -1,20 +1,23 @@
 package app;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
 public class Customer extends Bank{
+	
 	private String firstName;
 	private String lastName;
 	static String email;
 	static String registeredPassword;
-	static String status;
+	String status;
 	static int userID;
 	
 
@@ -98,7 +101,7 @@ public class Customer extends Bank{
 				System.out.println("Passwords Do Not Match");
 		
 		//}
-		Bank.clearScreen();
+		Bank.main_clearScreen();
 		
 		String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
 		String username = "postgres";
@@ -140,19 +143,16 @@ public class Customer extends Bank{
 	}//catch (SQLException ex) {
 
 	public int loginCustomer() {
-		String name;
 		int loginLooper=0;
 		int attemptCounter=0;
 		
-		clearScreen();
-		Scanner loginScanner = new Scanner(System.in);
-		
+		main_clearScreen();
 		System.out.println("Welcome Back");
 		
 		while (loginLooper==0) {
 			
 			if(attemptCounter>0) {
-				clearScreen();
+				main_clearScreen();
 				System.out.println("That Email Was Not Found");
 			}
 			
@@ -162,8 +162,6 @@ public class Customer extends Bank{
 			String username = "postgres";
 			String password = "Safety48@@";
 			String sql;
-			String statusL;
-			
 			try (Connection connection = DriverManager.getConnection(url, username, password)){
 				Scanner scanner = new Scanner(System.in);
 				
@@ -212,7 +210,7 @@ public class Customer extends Bank{
 										//statusL = "select status from customers where status =('" + scanner.nextLine()+"')";
 
 											if (enteredPassword.equalsIgnoreCase(registeredPassword)) {
-												clearScreen();
+												main_clearScreen();
 												System.out.println("Welcome Back " + firstName + " " + lastName + " "+ status);
 											}
 											else
@@ -235,6 +233,8 @@ public class Customer extends Bank{
 				return userID;
 				
 }
+	
+	
 }
 			
 	

@@ -33,7 +33,7 @@ public class Employee extends Bank {
 		
 		// i>0 && i <3
 				if(i>0 && EmployeeID == null && i<3) {
-					clearScreen();
+					main_clearScreen();
 					System.out.println("That ID Was Not Found\n");
 					System.out.println("Attempts Remaining: " + (3-i));
 					System.out.println(i);
@@ -42,7 +42,7 @@ public class Employee extends Bank {
 					
 				}
 				else if(i==3) {
-					clearScreen();
+					main_clearScreen();
 					System.out.println("Too Many Failed Attempts");
 					System.out.println("Goodbye");
 					break;
@@ -80,9 +80,8 @@ public class Employee extends Bank {
 								EmployeeType = resultSet.getString(4);
 								
 								System.out.println();
-								clearScreen();
-								System.out.println("Welcome Back " + EmployeeFirstName + " " + EmployeeLastName);
-								System.out.println("Current Permissions: " + EmployeeType );
+								main_clearScreen();
+								displayEmployeeWelcomeMessage();
 								loginLooper = 1;
 							}
 							resultSet.close();
@@ -99,6 +98,11 @@ public class Employee extends Bank {
 			}
 			
 		}
+
+	public static void displayEmployeeWelcomeMessage() {
+		System.out.println("Welcome Back " + EmployeeFirstName + " " + EmployeeLastName);
+		System.out.println("Current Permissions: " + EmployeeType );
+	}
 
 }
 
