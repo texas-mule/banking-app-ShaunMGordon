@@ -16,6 +16,7 @@ import java.sql.Statement;
 import app.Customer;
 import app.Employee;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 /*
  * 
  * PARENT CLASS - BANK APP
@@ -37,140 +38,660 @@ public class Bank {
 /*
  * Database Login Information
  */
-	
 	static String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
 	static String username = "postgres";
 	static String password = "Safety48@@";
-	//static String display;
 	
-/************************************/
+
 	
 	// Main
-	
-/***********************************/
-	
+
+/************************************************************************************************************************************************************************************/
+
 	
 	public static void main(String[] args) {
 		
 		// Run Program
-		String runProgramVariable = "Go";
-		while (runProgramVariable.equalsIgnoreCase("Go")) {
+			String runProgramVariable = "Go";
+			while (runProgramVariable.equalsIgnoreCase("Go")) {
 			
 			// Print Welcome Message
-			main_printWelcome();
+				main_printWelcome();
 		
-			// Implement Method to Decipher Between Employee and Customer	
-				int appUserDifferentiator = main_bankDecider();
+			// Implement Method to Decipher Between Employee and Customer
+				int x = 0;
+				try {
+					x=main_bankDecider();
+				} catch (Exception e1) {
+					main_clearScreen();
+					System.out.println("You have committed an action which was deemed unsafe\n\n Goodbye");
+				}
+				
+				int appUserDifferentiator=x;
 			
 			// Initiate Employee Interface
-			if(appUserDifferentiator==1 && EmployeeType!=null) {
-				main_employeeInterface();
-			}
+				if(appUserDifferentiator==1 && EmployeeType!=null) {
+					try {
+						main_employeeInterface();
+					} catch (Exception e) {
+						main_clearScreen();
+						System.out.println("You have committed an action which was deemed unsafe\n\n Goodbye");
+					}
+				}
 			
 			//Initiate Customer Interface
-			if(appUserDifferentiator==2) {
-				
-				ArrayList<Integer> availableAccounts;
-				
-				Scanner customerScanner = new Scanner(System.in);
-				int customerTypeDifferientator = customerScanner.nextInt();
-				
-				if(customerTypeDifferientator == 1) {
-					
-					// Instantiate Customer Object
-					Customer person = new Customer();
-					userID = person.loginCustomer();
-					status = person.status;
-					String firstName= person.getFirstName();
-					String lastName= person.getLastName();
-					
-					// Implement Main Menu Loop
-					int customerMenuLooper=0;
-					
-					// Differentiate between cycles
-					int rotation=0;
-					
-					//Restarts Program If User Account Not Activated
-					if(status.equalsIgnoreCase("Pending")|| status.equalsIgnoreCase("Denied")) {
-						main_restartProgram();
-					}
-					
-					// Initiates Active Customer Function
-					while(customerMenuLooper==0 && status.equalsIgnoreCase("Active")) {
-						
-						// Print Customer Name if reset to main menu
-						if(rotation>0) {
-							main_clearScreen();
-							System.out.println("Customer: "+firstName+""+" "+" "+lastName+"\n");
-						}
-						
-						// Menu Options
-						System.out.println("Please Select From The Following Options\n");
-						System.out.println("1. Display all currently active accounts");
-						System.out.println("2. Apply for a new account");
-						System.out.println("3. Initiate a Transfer");
-						
-						// Take Customer Input
-						int customerMenuDecider = customerScanner.nextInt();
-						
-						// Display Active Accounts
-						if(customerMenuDecider == 1) {	
-							customer_currentActiveAccounts(rotation, customerScanner);
-							
-						}
-						
-						// Apply For New Account
-						if(customerMenuDecider == 2) {
-							
-							customer_AccountApplication(customerScanner);
-						}
+				if(appUserDifferentiator==2) {
+					try {
+						main_customerInterface();
+					} catch (Exception e) {
+						main_clearScreen();
+						System.out.println("You have committed an action which was deemed unsafe\n\n Goodbye");
 					}
 				}
-				else{
-					Customer.registerCustomer();	
+			}
+		
+	}
+
+
+
+
+/************************************************************************************************************************************************************************************/
+
+
+
+	private static void main_customerInterface() throws Exception {
+		int customerLoop=0;
+		
+		while(customerLoop==0) {
+			Scanner customerScanner = new Scanner(System.in);
+			int customerTypeDifferientator = customerScanner .nextInt();
+			
+			if(customerTypeDifferientator == 1) {
+				customerLoop=1;
+				customer_ExistingUser();
+			}
+			
+			if(customerTypeDifferientator==2) {
+				customerLoop=2;
+				Customer.registerCustomer();
+			}
+			else{
+				System.out.println("Invalid Input");	
+			}
+		}
+	}
+
+	private static void customer_ExistingUser() {
+		ArrayList<Integer> availableAccounts;
+		
+		Scanner customerScanner = new Scanner(System.in);
+		// Instantiate Customer Object
+		Customer person = new Customer();
+		userID = person.loginCustomer();
+		status = person.status;
+		String firstName= person.getFirstName();
+		String lastName= person.getLastName();
+		
+		// Implement Main Menu Loop
+		int customerMenuLooper=0;
+		
+		// Differentiate between cycles
+		int rotation=0;
+		
+		//Restarts Program If User Account Not Activated
+		if(status.equalsIgnoreCase("Pending")|| status.equalsIgnoreCase("Denied")) {
+			main_restartProgram();
+		}
+		
+		// Initiates Active Customer Function
+		while(customerMenuLooper==0 && status.equalsIgnoreCase("Active")) {
+			
+			// Print Customer Name if reset to main menu
+			if(rotation>0) {
+				main_clearScreen();
+				System.out.println("Customer: "+firstName+""+" "+" "+lastName+"\n");
+			}
+			
+			// Menu Options
+			System.out.println("Please Select From The Following Options\n");
+			System.out.println("1. Display all currently active accounts");
+			System.out.println("2. Apply for a new account");
+			System.out.println("3. Initiate a Transfer");
+			
+			// Take Customer Input
+			int customerMenuDecider = customerScanner.nextInt();
+			
+			// Display Active Accounts
+			if(customerMenuDecider == 1) {	
+				customer_currentActiveAccounts(rotation);
+			}
+			
+			// Apply For New Account
+			if(customerMenuDecider == 2) {
+				customer_AccountApplication();
+			}
+			
+			// Initiate A Transfer
+			if(customerMenuDecider == 3) {
+				customer_TransferFunction();
+			}
+			else {
+				System.out.println("Invalid Input");
+			}
+		}
+	}
+
+	private static void customer_TransferFunction() {
+	Scanner customerScanner = new Scanner(System.in);
+	ArrayList<Integer> availableAccounts;
+	int transferLoop=0;
+	while(transferLoop==0) {
+		Scanner transferScanner = new Scanner(System.in);
+		String continueTransfer;
+		int validTransferFromAccount = 0;
+		//Display Currently Active Accounts
+		availableAccounts=displayCustomerCurrentAccounts();
+		
+		// Select "Transfer From" Account
+		int transferFromLoop=0;
+		while(transferFromLoop ==0) {
+			System.out.println("Select which account you would like to transfer from: ");
+			int transferFromAccount=customerScanner.nextInt();
+			if(availableAccounts.contains(transferFromAccount)) {
+				validTransferFromAccount=transferFromAccount;
+				transferFromLoop=1;
+			}
+			else {
+				System.out.println("That is not a valid account");
+				System.out.println("Would you like to continue with the transfer?");
+				continueTransfer=transferScanner.nextLine();
+				if(continueTransfer.equalsIgnoreCase("yes")) {
+					main_clearScreen();
+					System.out.println(availableAccounts);
+					transferFromLoop=0;
 				}
+				else
+					transferFromLoop=1;
+				
 			}
 		}
 		
-	}
+		// Enter "Transfer To" Account
+		int transferToLoop=0;
+		int transferToAccount;
+		int validatedTransferToAccount=0;
+		while(transferToLoop ==0 && validTransferFromAccount!= 0) {
+			System.out.println("Do you know the account number into which you would like to transfer?");
+			// Take User Input
+			continueTransfer=transferScanner.nextLine();
+			
+			if(continueTransfer.equalsIgnoreCase("yes")) {
+				System.out.println("Enter the account number you would like to transfer to: ");
+				
+				// Take User Input
+				transferToAccount=customerScanner.nextInt();
+				
+				// Validate Transfer To Account
+				ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+				
+				try (Connection connection = DriverManager.getConnection(url, username, password)){
+					Statement statement = connection.createStatement();
+					String search = "select accountid from accounts";
+					
+					boolean isResultSet = statement.execute(search);
+				
+					if (isResultSet) {
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();
+				
+						while (resultSet.next()) {
+							
+							int accountnum = resultSet.getInt(1);
+						
+							accountNumbers.add(accountnum);
+						}
+							resultSet.close();
+					} 
+				
+						statement.close();
+																									} 
+				catch (SQLException ex) {
+						ex.printStackTrace();
+										}
+				
+				if(accountNumbers.contains(transferToAccount)) {
+					validatedTransferToAccount=transferToAccount;
+					transferToLoop=1;
+				}
+			
+				else {
+					System.out.println("That is not a valid account");
+				}
+			}
+		else {
+			main_clearScreen();
+			System.out.println("Please contact your institution before proceeding");
+			System.out.println("Would you like to continue with the transfer?");
+			continueTransfer=transferScanner.nextLine();
+			if(continueTransfer.equalsIgnoreCase("yes")) {
+				main_clearScreen();
+				System.out.println("Your available accounts: "+ availableAccounts);
+				transferToLoop=0;
+			}
+			else {
+				transferToLoop=1;
+				transferLoop=1;
+				main_clearScreen();
+			}
+		}
+			
+		}
+		// Enter Amount to Transfer
+		System.out.println("Enter the amount you would like to transfer");
+		BigDecimal transferAmount = customerScanner.nextBigDecimal();
+		
+		// Validate amount is available
+		BigDecimal accountbalance = null;
+		try (Connection connection = DriverManager.getConnection(url, username, password)){
+			Statement statement = connection.createStatement();
+			String search = "select balance from accounts where accountid = "+validTransferFromAccount+"";
 
-
-
-
-
-
-private static void customer_AccountApplication(Scanner customerScanner) {
-	//Menu Options
-	System.out.println("What kind of account would you like to open?\n");
-	System.out.println("1. Checking Account");
-	System.out.println("2. Savings Account");
-	System.out.println("3. Joint Account");
-	
-	//Take Customer Input
-	int accountCreationDecider = customerScanner.nextInt();
-	
-	// Create Checking Account
-	if(accountCreationDecider==1) {
-		customer_CreateCheckingAccount();
-	}
-	
-	// Create Savings Account
-	if(accountCreationDecider==2) {
-		customer_CreateSavingsAccount();	
-	}
-	
-	// Create Joint Account
-	if(accountCreationDecider==3) {
-		customer_CreateJointAccount();
-	}
+			boolean isResultSet = statement.execute(search);
+		
+			if (isResultSet) {
+				ResultSet resultSet = statement.getResultSet();
+				ResultSetMetaData rsmd = resultSet.getMetaData();
+				
+				int i=0;
+				
+				while (resultSet.next()) {
+					accountbalance = resultSet.getBigDecimal(1);
+					System.out.print("\t"+accountbalance+"\t");
+										}
+					resultSet.close();
+							} 
+				statement.close();
+		} 
+		catch (SQLException ex) {
+				ex.printStackTrace();
+		}
+		
+		// Transfer
+		if(accountbalance.compareTo(transferAmount)>=0 && validatedTransferToAccount!=0) {
+			// Add to Account
+			try (Connection connection = DriverManager.getConnection(url, username, password)){
+				Statement statement = connection.createStatement();
+				String transfer = "UPDATE accounts SET balance = balance + "+transferAmount+"where accountid =  "+validatedTransferToAccount+"";
+				statement.executeUpdate(transfer);
+			
+					statement.close();
+																								} 
+			catch (SQLException ex) {
+				
+					ex.printStackTrace();
+					
+									}
+			// Subtract from Account
+			try (Connection connection = DriverManager.getConnection(url, username, password)){
+				Statement statement = connection.createStatement();
+				String transfer = "UPDATE accounts SET balance = balance - "+transferAmount+"where accountid = "+validTransferFromAccount+"";
+				statement.executeUpdate(transfer);
+					statement.close();
+																								} 
+			catch (SQLException ex) {
+				
+					ex.printStackTrace();
+					
+									}
+			
+		}
+		
+		//Display Updated Accounts
+		displayCustomerCurrentAccounts();
+		transferLoop=1;
+}
 }
 
 
+/************************************************************************************************************************************************************************************/
+	
+/*
+ * MAIN functions
+ */
+	public static int main_bankDecider() throws Exception{
+		int x=0;
+		Scanner bankDecider = new Scanner(System.in);
+		String decider = bankDecider.nextLine();
+		
+		String employeeDecider = "yes";
+		String customerDecider = "no";
+		
+			if(decider.equalsIgnoreCase(employeeDecider)) {
+// If yes, connect to Employee Version
+				employeeWelcome();
+				Employee employee = new Employee();
+				x = 1;
+			}
+			else if(decider.equalsIgnoreCase(customerDecider)){
+// If no, connect to Customer Version
+				customerWelcome();
+				Customer customer = new Customer();
+				x = 2;
+			}
+			else {
+// Print Error 
+				main_clearScreen();
+				System.out.println("Invalid Response\n Please Try Again\n\n ");
+				System.out.println("Are You A SGBanking Employee?");
+			}
+		return x;
+	}
+	private static void main_employeeInterface() throws Exception {		
+		// Base Employee Permissions
+		
+		if(EmployeeType.equalsIgnoreCase("Employee")) {
+			employeeActions();
+		}
+		
+		// Administrative Permissions
+		
+		else if(EmployeeType.equalsIgnoreCase("Admin")){
+			adminActions();
+			
+		}
+}
+	private static void main_restartProgram() {
+		if(restart.equalsIgnoreCase("yes")) {
+		try {
+			System.out.println("\nRestarting Program in 3");
+		    Thread.sleep(1000); 
+		    System.out.println("\n                      2");
+		    Thread.sleep(1000); 
+		    System.out.println("\n                      1");
+		    Thread.sleep(1000); 
+		    main_clearScreen();
+		} catch (InterruptedException e) {
+		    e.printStackTrace();
+		}
+		}
+	} 
+	private static void main_printWelcome() {
+		System.out.println();
+		System.out.println("--------------------------------\n");
+		System.out.println("~ Hello, Welcome To SG Banking ~\n");
+		System.out.println("--------------------------------\n");
+		System.out.println("Are You A SGBanking Employee?");
+		
+	}
+	public static void main_clearScreen() {  
+	    System.out.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");  
+		}
+	
+
+
+/*
+ * EMPLOYEE functions	
+ */
+	private static void employeeActions() {
+		String display;
+		String empcont = "yes";
+		Scanner empScan = new Scanner(System.in);
+		
+		while( empcont.equalsIgnoreCase("yes")) {
+			main_clearScreen();
+			System.out.println();
+			System.out.println();
+			Employee.displayEmployeeWelcomeMessage();
+			System.out.println();
+			System.out.println("Allowed Actions:");
+			System.out.println();
+			System.out.println("1. View Active Accounts");
+			System.out.println("2. View Pending User Accounts");
+			System.out.println("3. View Denied Accounts");
+	
+			Scanner scanner = new Scanner(System.in);
+			int AllowedAction = scanner.nextInt();
+			
+			
+			if (AllowedAction == 1)
+				admin_ViewActiveAccounts(empScan, scanner);
+			else if (AllowedAction == 2) {
+				managePendingAccounts();
+				System.out.println("\nWould you like to return to the main menu?");
+				empcont = empScan.nextLine();
+				
+			}
+			
+			else if (AllowedAction == 3) {
+				
+				displayDeniedAccounts();
+				System.out.println("Would you like to return to the main menu?");
+				empcont = empScan.nextLine();
+				
+			}
+			else {
+				System.out.println("Invalid Input");
+				System.out.println("Would you like to return to the main menu?");
+				empcont = empScan.nextLine();
+			}
+		}
+	
+			main_clearScreen();
+			System.out.println("Goodbye");
+	}	
+	private static void employeeWelcome() {
+		main_clearScreen();
+		Employee.employeeWelcome();
+		
+	}
+	
+	
+	
+	
+	/*
+ * ADMIN functions	
+ */
+		
+	private static void adminActions() {
+		String display;
+		String empcont = "yes";
+		Scanner empScan = new Scanner(System.in);
+		
+		while( empcont.equalsIgnoreCase("yes")) {
+			main_clearScreen();
+			System.out.println();
+			System.out.println();
+			Employee.displayEmployeeWelcomeMessage();
+			System.out.println();
+			System.out.println("Allowed Actions:");
+			System.out.println();
+			System.out.println("1. View Active Accounts");
+			System.out.println("2. View Pending User Accounts");
+			System.out.println("3. View Denied Accounts");
+	
+			Scanner scanner = new Scanner(System.in);
+			int AllowedAction = scanner.nextInt();
+			
+			
+			if (AllowedAction == 1)
+				admin_ViewActiveAccounts(empScan, scanner);
+			
+			else if (AllowedAction == 2) {
+				managePendingAccounts();
+				System.out.println("\nWould you like to return to the main menu?");
+				empcont = empScan.nextLine();
+				
+			}
+			
+			else if (AllowedAction == 3) {
+				
+				displayDeniedAccounts();
+				System.out.println("Would you like to return to the main menu?");
+				empcont = empScan.nextLine();
+				
+			}
+			else {
+				System.out.println("Invalid Input");
+				System.out.println("Would you like to return to the main menu?");
+				empcont = empScan.nextLine();
+			}
+		}
+	
+			main_clearScreen();
+			System.out.println("Goodbye");
+	}
 
 
 
 
-	private static void customer_CreateJointAccount() {
+	private static void admin_ViewActiveAccounts(Scanner empScan, Scanner scanner) {
+		String display;
+		{
+			
+			String viewMoreAccounts="yes";
+		
+			while(viewMoreAccounts.equalsIgnoreCase("yes")){
+				
+			
+			displayActiveUserAccounts();
+			System.out.println("\nAllowed Actions: ");
+			System.out.println("1. View Account Detailed Information");
+			System.out.println("2. Return to Main Menu");
+			
+			int allowedActiveActions = empScan.nextInt();
+			if(allowedActiveActions==1) {
+				
+				System.out.println("Which User Account would you like to select");
+				int activeUserID = scanner.nextInt() ;
+				
+				int currentAccounts= 0;
+				ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+				
+				try (Connection connection = DriverManager.getConnection(url, username, password)){
+					Statement statement = connection.createStatement();
+					display = "select * from accounts where "+activeUserID+" = ANY (userid) AND status = 'Active'";
+				
+					//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+					
+					boolean isResultSet = statement.execute(display);
+					main_clearScreen();
+					if (isResultSet) {
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();
+						System.out.print("Account"+"\t");
+						System.out.print("Type"+"\t");
+						System.out.print("\t"+"Balance"+"\t");
+						System.out.print("\t"+"Status"+"\t");
+						System.out.println();
+						System.out.println();
+						
+						int i=0;
+						
+						while (resultSet.next()) {
+							
+							int accountnum = resultSet.getInt(1);
+							String accounttype = resultSet.getString(2);
+							BigDecimal accountbalance = resultSet.getBigDecimal(3);
+							String accountStatus = resultSet.getString(4);
+							System.out.print(accountnum);
+							System.out.print("\t"+accounttype);
+							System.out.print("\t"+accountbalance+"\t");
+							System.out.print("\t"+accountStatus);
+
+							System.out.println();
+							System.out.println("--------------------------------------------------------------------------------");
+							currentAccounts = resultSet.getRow();
+							//System.out.println(accountnum);
+							accountNumbers.add(accountnum);
+												}
+							resultSet.close();
+									}
+					display = "select * from customers where bankID = "+activeUserID+"";
+					
+					//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+					
+					statement.execute(display);
+					
+					ResultSet resultSet = statement.getResultSet();
+					ResultSetMetaData rsmd = resultSet.getMetaData();
+					
+					while (resultSet.next()) {
+						String firstName = resultSet.getString(1);
+						String lastName = resultSet.getString(2);
+						int userID= resultSet.getInt(8);
+						int flength= firstName.length();
+						if (flength < 10) {
+							for(int i =0;i<=(10-flength);i++)
+								firstName= firstName + " ";
+						}
+
+						System.out.print("\nCurrently Viewing Accounts For: \t");
+						System.out.print(userID+"\t");
+						System.out.print(firstName+" ");
+						System.out.print(lastName);
+						
+											}
+					
+				
+																									} 
+				catch (SQLException ex) {
+					
+						ex.printStackTrace();
+						
+										}
+				System.out.println("\n\nWould you like view more active accounts?");
+				Scanner activeScan = new Scanner(System.in);
+				viewMoreAccounts = activeScan.nextLine();
+			}
+			
+			
+			if(allowedActiveActions==2) {
+				viewMoreAccounts="no";
+			}
+			}
+		}
+	}	
+
+	
+	
+/*
+ * CUSTOMER functions	
+ */
+	public static void customerWelcome() {
+		main_clearScreen();
+		Customer.printWelcome();
+		
+	}
+	
+	
+	private static void customer_AccountApplication() {
+		Scanner applicationScanner = new Scanner(System.in);
+		//Menu Options
+		System.out.println("What kind of account would you like to open?\n");
+		System.out.println("1. Checking Account");
+		System.out.println("2. Savings Account");
+		System.out.println("3. Joint Account");
+		
+		//Take Customer Input
+		int accountCreationDecider = applicationScanner.nextInt();
+		
+		// Create Checking Account
+		if(accountCreationDecider==1) {
+			customer_CreateCheckingAccount();
+		}
+		
+		// Create Savings Account
+		if(accountCreationDecider==2) {
+			customer_CreateSavingsAccount();	
+		}
+		
+		// Create Joint Account
+		if(accountCreationDecider==3) {
+			customer_CreateJointAccount();
+		}
+	}
+	// Account Application Functions
+		private static void customer_CreateJointAccount() {
 		ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
 		ArrayList <Integer> validUserID = new ArrayList<Integer>();
 		Scanner jointScanner = new Scanner(System.in);
@@ -300,477 +821,177 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 			System.out.println("Please contact your institution before proceeding with creating a joint account\n\n");
 			repeat=1;
 		}
-}
-	}
-
-
-
-
-
-
-	private static void customer_CreateSavingsAccount() {
-		ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
-		
-		// Connect to Database
-		try (Connection creatingSavingsAccount = DriverManager.getConnection(url, username, password)){
-				Statement createSavingsAccount = creatingSavingsAccount.createStatement();
-				
-				// Create Savings Account
-				String create= "INSERT INTO accounts(type, balance, status, userid)"
-						+ "VALUES ('Savings', 0.00,'Pending','{"+userID+"}')";
-				createSavingsAccount.executeUpdate(create);
-				
-				// Display Currently Pending Accounts
-				int currentAccounts= 0;
-				String display = "SELECT * FROM accounts WHERE status = 'Pending' AND "+userID+" = ANY (userid)";
-				boolean isResultSet = createSavingsAccount.execute(display);
-				if (isResultSet) {
-					
-					ResultSet resultSet = createSavingsAccount.getResultSet();
-					main_clearScreen();
-					
-					// Print Header Line
-					System.out.print("Account"+"\t");
-					System.out.print("Type"+"\t");
-					System.out.print("\t"+"Balance"+"\t");
-					System.out.print("\t"+"Status"+"\t");
-					System.out.println();
-					System.out.println();
-					
-					// Cycle Through ResultSet
-					while (resultSet.next()) {
-						
-						// Pull Account Details
-						int accountNumber = resultSet.getInt(1);
-						String accountType = resultSet.getString(2);
-						BigDecimal accountBalance = resultSet.getBigDecimal(3);
-						String accountStatus = resultSet.getString(4);
-						
-						// Print Account Details
-						if(accountType.equalsIgnoreCase("Savings")) {
-						System.out.print(accountNumber);
-						System.out.print("\t"+accountType+"\t");
-						System.out.print("\t"+accountBalance+"\t");
-						System.out.print("\t"+accountStatus);
-						System.out.println();
-						System.out.println("--------------------------------------------------------------------------------");
-						}
-						
-						if(accountType.equalsIgnoreCase("Checking")) {
-							System.out.print(accountNumber);
-							System.out.print("\t"+accountType);
-							System.out.print("\t"+accountBalance+"\t");
-							System.out.print("\t"+accountStatus);
-							System.out.println();
-							System.out.println("--------------------------------------------------------------------------------");
-							}
-						if(accountType.equalsIgnoreCase("Joint")) {
-							System.out.print(accountNumber);
-							System.out.print("\t"+accountType+"\t");
-							System.out.print("\t"+accountBalance+"\t");
-							System.out.print("\t"+accountStatus);
-							System.out.println();
-							System.out.println("--------------------------------------------------------------------------------");
-						}
-						// Gather Number Of Accounts
-						currentAccounts = resultSet.getRow();
-						accountNumbers.add(accountNumber);
-					}
-						System.out.println("\nYou currently have " + currentAccounts + " pending applications");
-						resultSet.close();
-				} 
-		
-				createSavingsAccount.close();
-				
-		} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-		
-		// End Savings Account Creation
-		System.out.println("	Your application for a new savings account is currently pending");
-		System.out.println("\t\t\t\t -~- \t\t\t\t\t\n");
-	}
-
-
-
-
-
-
-	private static void customer_CreateCheckingAccount() {
-		ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
-		
-		// Connect to Database
-		try (Connection creatingCheckingAccount = DriverManager.getConnection(url, username, password)){
-				Statement createCheckingAccount = creatingCheckingAccount.createStatement();
-				
-				// Create Checking Account
-				String create= "INSERT INTO accounts(type, balance, status, userid)"
-						+ "VALUES ('Checking', 0.00,'Pending','{"+userID+"}')";
-				createCheckingAccount.executeUpdate(create);
-				
-				// Display Currently Pending Accounts
-				int currentAccounts= 0;
-				String display = "SELECT * FROM accounts WHERE status = 'Pending' AND "+userID+" = ANY (userid)";
-				boolean isResultSet = createCheckingAccount.execute(display);
-				if (isResultSet) {
-					
-					ResultSet resultSet = createCheckingAccount.getResultSet();
-					main_clearScreen();
-					
-					// Print Header Line
-					System.out.print("Account"+"\t");
-					System.out.print("Type"+"\t");
-					System.out.print("\t"+"Balance"+"\t");
-					System.out.print("\t"+"Status"+"\t");
-					System.out.println();
-					System.out.println();
-					
-					// Cycle Through ResultSet
-					while (resultSet.next()) {
-						
-						// Pull Account Details
-						int accountNumber = resultSet.getInt(1);
-						String accountType = resultSet.getString(2);
-						BigDecimal accountBalance = resultSet.getBigDecimal(3);
-						String accountStatus = resultSet.getString(4);
-						
-						// Print Account Details
-						if(accountType.equalsIgnoreCase("Savings")) {
-						System.out.print(accountNumber);
-						System.out.print("\t"+accountType+"\t");
-						System.out.print("\t"+accountBalance+"\t");
-						System.out.print("\t"+accountStatus);
-						System.out.println();
-						System.out.println("--------------------------------------------------------------------------------");
-						}
-						
-						if(accountType.equalsIgnoreCase("Checking")) {
-							System.out.print(accountNumber);
-							System.out.print("\t"+accountType);
-							System.out.print("\t"+accountBalance+"\t");
-							System.out.print("\t"+accountStatus);
-							System.out.println();
-							System.out.println("--------------------------------------------------------------------------------");
-							}
-						if(accountType.equalsIgnoreCase("Joint")) {
-							System.out.print(accountNumber);
-							System.out.print("\t"+accountType+"\t");
-							System.out.print("\t"+accountBalance+"\t");
-							System.out.print("\t"+accountStatus);
-							System.out.println();
-							System.out.println("--------------------------------------------------------------------------------");
-						}
-						// Gather Number Of Accounts
-						currentAccounts = resultSet.getRow();
-						accountNumbers.add(accountNumber);
-					}
-						System.out.println("\nYou currently have " + currentAccounts + " pending applications");
-						resultSet.close();
-				} 
-		
-				createCheckingAccount.close();
-				
-		} catch (SQLException ex) {
-				ex.printStackTrace();
-			}
-		
-		// End Checking Account Creation
-		System.out.println("	Your application for a new checking account is currently pending");
-		System.out.println("\t\t\t\t -~- \t\t\t\t\t\n");
-	}
-	
-/*
- * MAIN functions
- */
-	public static int main_bankDecider() {
-		int x=0;
-		Scanner bankDecider = new Scanner(System.in);
-		String decider = bankDecider.nextLine();
-		
-		String employeeDecider = "yes";
-		String customerDecider = "no";
-		
-			if(decider.equalsIgnoreCase(employeeDecider)) {
-// If yes, connect to Employee Version
-				employeeWelcome();
-				Employee employee = new Employee();
-				x = 1;
-			}
-			else if(decider.equalsIgnoreCase(customerDecider)){
-// If no, connect to Customer Version
-				customerWelcome();
-				Customer customer = new Customer();
-				x = 2;
-			}
-			else {
-// Print Error 
-				main_clearScreen();
-				System.out.println("Invalid Response\n Please Try Again\n\n ");
-				System.out.println("Are You A SGBanking Employee?");
-			}
-		return x;
-	}
-	private static void main_employeeInterface() {		
-		// Base Employee Permissions
-		
-		if(EmployeeType.equalsIgnoreCase("Employee")) {
-			employeeActions();
 		}
-		
-		// Administrative Permissions
-		
-		else if(EmployeeType.equalsIgnoreCase("Admin")){
-			adminActions();
+	}
+		private static void customer_CreateSavingsAccount() {
+			ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
 			
-		}
-}
-	private static void main_restartProgram() {
-		if(restart.equalsIgnoreCase("yes")) {
-		try {
-			System.out.println("\nRestarting Program in 3");
-		    Thread.sleep(1000); 
-		    System.out.println("\n                      2");
-		    Thread.sleep(1000); 
-		    System.out.println("\n                      1");
-		    Thread.sleep(1000); 
-		    main_clearScreen();
-		} catch (InterruptedException e) {
-		    e.printStackTrace();
-		}
-		}
-	} 
-	private static void main_printWelcome() {
-		System.out.println();
-		System.out.println("--------------------------------\n");
-		System.out.println("~ Hello, Welcome To SG Banking ~\n");
-		System.out.println("--------------------------------\n");
-		System.out.println("Are You A SGBanking Employee?");
-		
-	}
-	public static void main_clearScreen() {  
-	    System.out.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");  
-		}
-	
-/*
- * EMPLOYEE functions	
- */
-	private static void employeeActions() {
-		String display;
-		String empcont = "yes";
-		Scanner empScan = new Scanner(System.in);
-		
-		while( empcont.equalsIgnoreCase("yes")) {
-			main_clearScreen();
-			System.out.println();
-			System.out.println();
-			Employee.displayEmployeeWelcomeMessage();
-			System.out.println();
-			System.out.println("Allowed Actions:");
-			System.out.println();
-			System.out.println("1. View Active Accounts");
-			System.out.println("2. View Pending User Accounts");
-			System.out.println("3. View Denied Accounts");
-	
-			Scanner scanner = new Scanner(System.in);
-			int AllowedAction = scanner.nextInt();
-			
-			
-			if (AllowedAction == 1) {
-				
-				String viewMoreAccounts="yes";
-			
-				while(viewMoreAccounts.equalsIgnoreCase("yes")){
+			// Connect to Database
+			try (Connection creatingSavingsAccount = DriverManager.getConnection(url, username, password)){
+					Statement createSavingsAccount = creatingSavingsAccount.createStatement();
 					
-				
-				displayActiveUserAccounts();
-				System.out.println("\nAllowed Actions: ");
-				System.out.println("1. View Account Detailed Information");
-				System.out.println("2. Return to Main Menu");
-				
-				int allowedActiveActions = empScan.nextInt();
-				if(allowedActiveActions==1) {
+					// Create Savings Account
+					String create= "INSERT INTO accounts(type, balance, status, userid)"
+							+ "VALUES ('Savings', 0.00,'Pending','{"+userID+"}')";
+					createSavingsAccount.executeUpdate(create);
 					
-					System.out.println("Which User Account would you like to select");
-					int activeUserID = scanner.nextInt();
-					
+					// Display Currently Pending Accounts
 					int currentAccounts= 0;
-					ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
-					
-					try (Connection connection = DriverManager.getConnection(url, username, password)){
-						Statement statement = connection.createStatement();
-						display = "select * from accounts where "+activeUserID+" = ANY (userid) AND status = 'Active'";
-					
-						//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+					String display = "SELECT * FROM accounts WHERE status = 'Pending' AND "+userID+" = ANY (userid)";
+					boolean isResultSet = createSavingsAccount.execute(display);
+					if (isResultSet) {
 						
-						boolean isResultSet = statement.execute(display);
+						ResultSet resultSet = createSavingsAccount.getResultSet();
 						main_clearScreen();
-						if (isResultSet) {
-							ResultSet resultSet = statement.getResultSet();
-							ResultSetMetaData rsmd = resultSet.getMetaData();
-							System.out.print("Account"+"\t");
-							System.out.print("Type"+"\t");
-							System.out.print("\t"+"Balance"+"\t");
-							System.out.print("\t"+"Status"+"\t");
-							System.out.println();
-							System.out.println();
+						
+						// Print Header Line
+						System.out.print("Account"+"\t");
+						System.out.print("Type"+"\t");
+						System.out.print("\t"+"Balance"+"\t");
+						System.out.print("\t"+"Status"+"\t");
+						System.out.println();
+						System.out.println();
+						
+						// Cycle Through ResultSet
+						while (resultSet.next()) {
 							
-							int i=0;
+							// Pull Account Details
+							int accountNumber = resultSet.getInt(1);
+							String accountType = resultSet.getString(2);
+							BigDecimal accountBalance = resultSet.getBigDecimal(3);
+							String accountStatus = resultSet.getString(4);
 							
-							while (resultSet.next()) {
-								
-								int accountnum = resultSet.getInt(1);
-								String accounttype = resultSet.getString(2);
-								BigDecimal accountbalance = resultSet.getBigDecimal(3);
-								String accountStatus = resultSet.getString(4);
-								System.out.print(accountnum);
-								System.out.print("\t"+accounttype);
-								System.out.print("\t"+accountbalance+"\t");
+							// Print Account Details
+							if(accountType.equalsIgnoreCase("Savings")) {
+							System.out.print(accountNumber);
+							System.out.print("\t"+accountType+"\t");
+							System.out.print("\t"+accountBalance+"\t");
+							System.out.print("\t"+accountStatus);
+							System.out.println();
+							System.out.println("--------------------------------------------------------------------------------");
+							}
+							
+							if(accountType.equalsIgnoreCase("Checking")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType);
+								System.out.print("\t"+accountBalance+"\t");
 								System.out.print("\t"+accountStatus);
-
 								System.out.println();
 								System.out.println("--------------------------------------------------------------------------------");
-								currentAccounts = resultSet.getRow();
-								//System.out.println(accountnum);
-								accountNumbers.add(accountnum);
-													}
-								resultSet.close();
-										}
-						display = "select * from customers where bankID = "+activeUserID+"";
-						
-						//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
-						
-						statement.execute(display);
-						
-						ResultSet resultSet = statement.getResultSet();
-						ResultSetMetaData rsmd = resultSet.getMetaData();
-						
-						while (resultSet.next()) {
-							String firstName = resultSet.getString(1);
-							String lastName = resultSet.getString(2);
-							int userID= resultSet.getInt(8);
-							int flength= firstName.length();
-							if (flength < 10) {
-								for(int i =0;i<=(10-flength);i++)
-									firstName= firstName + " ";
+								}
+							if(accountType.equalsIgnoreCase("Joint")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType+"\t");
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
 							}
-
-							System.out.print("\nCurrently Viewing Accounts For: \t");
-							System.out.print(userID+"\t");
-							System.out.print(firstName+" ");
-							System.out.print(lastName);
-							
-												}
-						
+							// Gather Number Of Accounts
+							currentAccounts = resultSet.getRow();
+							accountNumbers.add(accountNumber);
+						}
+							System.out.println("\nYou currently have " + currentAccounts + " pending applications");
+							resultSet.close();
+					} 
+			
+					createSavingsAccount.close();
 					
-																										} 
-					catch (SQLException ex) {
+			} catch (SQLException ex) {
+					ex.printStackTrace();
+				}
+			
+			// End Savings Account Creation
+			System.out.println("	Your application for a new savings account is currently pending");
+			System.out.println("\t\t\t\t -~- \t\t\t\t\t\n");
+		}
+		private static void customer_CreateCheckingAccount() {
+			ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+			
+			// Connect to Database
+			try (Connection creatingCheckingAccount = DriverManager.getConnection(url, username, password)){
+					Statement createCheckingAccount = creatingCheckingAccount.createStatement();
+					
+					// Create Checking Account
+					String create= "INSERT INTO accounts(type, balance, status, userid)"
+							+ "VALUES ('Checking', 0.00,'Pending','{"+userID+"}')";
+					createCheckingAccount.executeUpdate(create);
+					
+					// Display Currently Pending Accounts
+					int currentAccounts= 0;
+					String display = "SELECT * FROM accounts WHERE status = 'Pending' AND "+userID+" = ANY (userid)";
+					boolean isResultSet = createCheckingAccount.execute(display);
+					if (isResultSet) {
 						
-							ex.printStackTrace();
+						ResultSet resultSet = createCheckingAccount.getResultSet();
+						main_clearScreen();
+						
+						// Print Header Line
+						System.out.print("Account"+"\t");
+						System.out.print("Type"+"\t");
+						System.out.print("\t"+"Balance"+"\t");
+						System.out.print("\t"+"Status"+"\t");
+						System.out.println();
+						System.out.println();
+						
+						// Cycle Through ResultSet
+						while (resultSet.next()) {
 							
-											}
-					System.out.println("\n\nWould you like view more active accounts?");
-					Scanner activeScan = new Scanner(System.in);
-					viewMoreAccounts = activeScan.nextLine();
+							// Pull Account Details
+							int accountNumber = resultSet.getInt(1);
+							String accountType = resultSet.getString(2);
+							BigDecimal accountBalance = resultSet.getBigDecimal(3);
+							String accountStatus = resultSet.getString(4);
+							
+							// Print Account Details
+							if(accountType.equalsIgnoreCase("Savings")) {
+							System.out.print(accountNumber);
+							System.out.print("\t"+accountType+"\t");
+							System.out.print("\t"+accountBalance+"\t");
+							System.out.print("\t"+accountStatus);
+							System.out.println();
+							System.out.println("--------------------------------------------------------------------------------");
+							}
+							
+							if(accountType.equalsIgnoreCase("Checking")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType);
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+								}
+							if(accountType.equalsIgnoreCase("Joint")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType+"\t");
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+							// Gather Number Of Accounts
+							currentAccounts = resultSet.getRow();
+							accountNumbers.add(accountNumber);
+						}
+							System.out.println("\nYou currently have " + currentAccounts + " pending applications");
+							resultSet.close();
+					} 
+			
+					createCheckingAccount.close();
+					
+			} catch (SQLException ex) {
+					ex.printStackTrace();
 				}
-				
-				
-				if(allowedActiveActions==2) {
-					viewMoreAccounts="no";
-				}
-				}
-			}
 			
-			else if (AllowedAction == 2) {
-				managePendingAccounts();
-				System.out.println("\nWould you like to return to the main menu?");
-				empcont = empScan.nextLine();
-				
-			}
-			
-			else if (AllowedAction == 3) {
-				
-				displayDeniedAccounts();
-				System.out.println("Would you like to return to the main menu?");
-				empcont = empScan.nextLine();
-				
-			}
-			else {
-				System.out.println("Invalid Input");
-				System.out.println("Would you like to return to the main menu?");
-				empcont = empScan.nextLine();
-			}
-		}
-	
-			main_clearScreen();
-			System.out.println("Goodbye");
-	}	
-	private static void employeeWelcome() {
-		main_clearScreen();
-		Employee.employeeWelcome();
-		
-	}
-	
-	
-	
-	
-	/*
- * ADMIN functions	
- */
-		
-	private static void adminActions() {
-		System.out.println();
-		System.out.println();
-		System.out.println("Allowed Actions:");
-		System.out.println();
-		System.out.println("1. View Active Accounts");
-		System.out.println("2. View Pending Accounts");
-		System.out.println("3. View Denied Accounts");
-		System.out.println("4. View Cancelled Acounts");
-		
-		Scanner scanner = new Scanner(System.in);
-		int AllowedAction = scanner.nextInt();
-		
-		
-		if (AllowedAction == 1) {
-			
-			displayActiveUserAccounts();
-			
+			// End Checking Account Creation
+			System.out.println("	Your application for a new checking account is currently pending");
+			System.out.println("\t\t\t\t -~- \t\t\t\t\t\n");
 		}
 		
-		if (AllowedAction == 2) {
-			
-			managePendingAccounts();
-			
-		}
-		
-		if (AllowedAction == 3) {
-			
-			displayDeniedAccounts();
-			
-		}
-		if (AllowedAction == 4) {
-			
-			displayCancelledAccounts();
-			
-		}
-	}
 	
-	
-/*
- * CUSTOMER functions	
- */
-	public static void customerWelcome() {
-		main_clearScreen();
-		Customer.printWelcome();
-		
-	}
-	
-	
-
-	
-	
-	private static void customer_currentActiveAccounts(int rotation, Scanner customerDecider) {
+	private static void customer_currentActiveAccounts(int rotation) {
 		ArrayList<Integer> availableAccounts;
+		Scanner customerScanner = new Scanner(System.in);
 		int customerLooper;
 		availableAccounts=displayCustomerCurrentAccounts();
 		System.out.println("\nPlease Select From The Following Options\n");
@@ -778,7 +999,7 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 		System.out.println("2. Make A Deposit");
 		System.out.println("3. Make A Withdrawal");
 		
-		int accountActionDecider = customerDecider.nextInt();
+		int accountActionDecider = customerScanner.nextInt();
 		
 		if(accountActionDecider==1) {
 			customerLooper=0;
@@ -786,11 +1007,11 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 		}
 		
 		if(accountActionDecider==2) {
-			makeDeposit(availableAccounts, customerDecider);	
+			makeDeposit(availableAccounts, customerScanner);	
 		}
 		
 		if(accountActionDecider==3) {
-			makeWithdrawal(availableAccounts, customerDecider);	
+			makeWithdrawal(availableAccounts, customerScanner);	
 		}
 	}
 
@@ -1011,9 +1232,14 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 				
 				pendingUserAccountManagement(PendingDecider);
 			
-												}
+												} 
 			else
-				main_employeeInterface();
+				try {
+					main_employeeInterface();
+				} catch (Exception e) {
+					main_clearScreen();
+					System.out.println("You have committed an action which was deemed unsafe\n\n Goodbye");
+				}
 		}
 		
 			System.out.println("Would you like to view pending Bank Account Applications");
@@ -1021,6 +1247,8 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 			
 			if(pDecider.equalsIgnoreCase("yes")) {
 				
+				int pendingBankLoop=0;
+				while(pendingBankLoop==0) {
 				String managePendingBankAccounts = "yes";
 				
 				while (managePendingBankAccounts.equalsIgnoreCase("yes")){
@@ -1101,16 +1329,24 @@ private static void customer_AccountApplication(Scanner customerScanner) {
 					
 														}
 					System.out.println("Would you like to continue with pending Bank Acounts?");
+					}
 					managePendingBankAccounts= PendingDecider.nextLine();
+					if(managePendingBankAccounts.equalsIgnoreCase("yes"))
+						pendingBankLoop=0;
+					else
+						pendingBankLoop=1;
 				}
 					managePendingBankAccounts="no";
 					
 				}
 				
-			}
-		
-		else
-			main_employeeInterface();
+			} else
+				try {
+					main_employeeInterface();
+				} catch (Exception e) {
+					main_clearScreen();
+					System.out.println("You have committed an action which was deemed unsafe\n\n Goodbye");
+				}
 	}
 
 	private static void pendingUserAccountManagement(Scanner PendingDecider) {

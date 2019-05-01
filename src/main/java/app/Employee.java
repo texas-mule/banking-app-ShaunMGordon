@@ -63,7 +63,7 @@ public class Employee extends Bank {
 					//while(true) {
 						Statement statement = connection.createStatement();
 						//System.out.print("sql> ");
-						sql = "select * from employees where empid = " + scanner.nextLine();
+						sql = "select * from employees where empid = " + scanner.nextInt();
 						if (sql.equalsIgnoreCase("quit"))
 							break;
 						
