@@ -13,6 +13,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+
 import app.Customer;
 import app.Employee;
 import java.util.ArrayList;
@@ -336,7 +338,12 @@ public class Bank {
 				Statement statement = connection.createStatement();
 				String transfer = "UPDATE accounts SET balance = balance - "+transferAmount+"where accountid = "+validTransferFromAccount+"";
 				statement.executeUpdate(transfer);
-					statement.close();
+				
+				String log = "INSERT INTO transactions(time, type, amount, account, userid)"
+						+"VALUES (NOW(),'Transfer',"+transferAmount+","+validTransferFromAccount+", '{"+userID+"}')";
+		
+				statement.execute(log);
+				statement.close();
 																								} 
 			catch (SQLException ex) {
 				
@@ -454,7 +461,8 @@ public class Bank {
 			
 			
 			if (AllowedAction == 1)
-				admin_ViewActiveAccounts(empScan, scanner);
+				employee_ViewActiveAccounts(empScan, scanner);
+			
 			else if (AllowedAction == 2) {
 				managePendingAccounts();
 				System.out.println("\nWould you like to return to the main menu?");
@@ -484,6 +492,131 @@ public class Bank {
 		Employee.employeeWelcome();
 		
 	}
+	
+	
+	
+	
+	private static void employee_ViewActiveAccounts(Scanner empScan, Scanner scanner) {
+		String display;
+		{
+			
+			String viewMoreAccounts="yes";
+		
+			while(viewMoreAccounts.equalsIgnoreCase("yes")){
+				
+			
+			displayActiveUserAccounts();
+			System.out.println("\nAllowed Actions: ");
+			System.out.println("1. View Account Detailed Information");
+			System.out.println("2. Return to Main Menu");
+			
+			int allowedActiveActions = empScan.nextInt();
+			if(allowedActiveActions==1) {
+				
+				System.out.println("Which User Account would you like to select");
+				int activeUserID = scanner.nextInt() ;
+				
+				int currentAccounts= 0;
+				ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+				
+				try (Connection connection = DriverManager.getConnection(url, username, password)){
+					Statement statement = connection.createStatement();
+					display = "select * from accounts where "+activeUserID+" = ANY (userid) AND status = 'Active'";
+				
+					//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
+					
+					boolean isResultSet = statement.execute(display);
+					main_clearScreen();
+					if (isResultSet) {
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();
+						System.out.print("Account"+"\t");
+						System.out.print("Type"+"\t");
+						System.out.print("\t"+"Balance"+"\t");
+						System.out.print("\t"+"Status"+"\t");
+						System.out.println();
+						System.out.println();
+						
+						int i=0;
+						
+						while (resultSet.next()) {
+							
+							int accountNumber = resultSet.getInt(1);
+							String accountType = resultSet.getString(2);
+							BigDecimal accountBalance = resultSet.getBigDecimal(3);
+							String accountStatus = resultSet.getString(4);
+							// Print Account Details
+							if(accountType.equalsIgnoreCase("Savings")) {
+							System.out.print(accountNumber);
+							System.out.print("\t"+accountType+"\t");
+							System.out.print("\t"+accountBalance+"\t");
+							System.out.print("\t"+accountStatus);
+							System.out.println();
+							System.out.println("--------------------------------------------------------------------------------");
+							}
+							if(accountType.equalsIgnoreCase("Checking")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType);
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+							if(accountType.equalsIgnoreCase("Joint")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType+"\t");
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+												}
+							resultSet.close();
+									}
+					display = "select * from customers where bankID = "+activeUserID+"";
+					
+					
+					statement.execute(display);
+					
+					ResultSet resultSet = statement.getResultSet();
+					ResultSetMetaData rsmd = resultSet.getMetaData();
+					
+					while (resultSet.next()) {
+						String firstName = resultSet.getString(1);
+						String lastName = resultSet.getString(2);
+						int userID= resultSet.getInt(8);
+						int flength= firstName.length();
+						if (flength < 10) {
+							for(int i =0;i<=(10-flength);i++)
+								firstName= firstName + " ";
+						}
+
+						System.out.print("\nCurrently Viewing Accounts For: \t");
+						System.out.print(userID+"\t");
+						System.out.print(firstName+" ");
+						System.out.print(lastName);
+						
+											}
+					
+				
+																									} 
+				catch (SQLException ex) {
+					
+						ex.printStackTrace();
+						
+										}
+				System.out.println("\n\nWould you like view more active accounts?");
+				Scanner activeScan = new Scanner(System.in);
+				viewMoreAccounts = activeScan.nextLine();
+			}
+			
+			
+			if(allowedActiveActions==2) {
+				viewMoreAccounts="no";
+			}
+			}
+		}
+	}	
 	
 	
 	
@@ -556,9 +689,11 @@ public class Bank {
 			displayActiveUserAccounts();
 			System.out.println("\nAllowed Actions: ");
 			System.out.println("1. View Account Detailed Information");
-			System.out.println("2. Return to Main Menu");
+			System.out.println("2. View Recent Transaction Information");
+			System.out.println("3. Return to Main Menu");
 			
 			int allowedActiveActions = empScan.nextInt();
+			
 			if(allowedActiveActions==1) {
 				
 				System.out.println("Which User Account would you like to select");
@@ -571,8 +706,6 @@ public class Bank {
 					Statement statement = connection.createStatement();
 					display = "select * from accounts where "+activeUserID+" = ANY (userid) AND status = 'Active'";
 				
-					//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
-					
 					boolean isResultSet = statement.execute(display);
 					main_clearScreen();
 					if (isResultSet) {
@@ -589,26 +722,41 @@ public class Bank {
 						
 						while (resultSet.next()) {
 							
-							int accountnum = resultSet.getInt(1);
-							String accounttype = resultSet.getString(2);
-							BigDecimal accountbalance = resultSet.getBigDecimal(3);
+							int accountNumber = resultSet.getInt(1);
+							String accountType = resultSet.getString(2);
+							BigDecimal accountBalance = resultSet.getBigDecimal(3);
 							String accountStatus = resultSet.getString(4);
-							System.out.print(accountnum);
-							System.out.print("\t"+accounttype);
-							System.out.print("\t"+accountbalance+"\t");
+							// Print Account Details
+							if(accountType.equalsIgnoreCase("Savings")) {
+							System.out.print(accountNumber);
+							System.out.print("\t"+accountType+"\t");
+							System.out.print("\t"+accountBalance+"\t");
 							System.out.print("\t"+accountStatus);
-
 							System.out.println();
 							System.out.println("--------------------------------------------------------------------------------");
-							currentAccounts = resultSet.getRow();
-							//System.out.println(accountnum);
-							accountNumbers.add(accountnum);
+							}
+							if(accountType.equalsIgnoreCase("Checking")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType);
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+							if(accountType.equalsIgnoreCase("Joint")) {
+								System.out.print(accountNumber);
+								System.out.print("\t"+accountType+"\t");
+								System.out.print("\t"+accountBalance+"\t");
+								System.out.print("\t"+accountStatus);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
 												}
 							resultSet.close();
-									}
+						}
+					
 					display = "select * from customers where bankID = "+activeUserID+"";
 					
-					//SELECT * FROM sal_emp WHERE 10000 = ANY (pay_by_quarter);
 					
 					statement.execute(display);
 					
@@ -629,23 +777,129 @@ public class Bank {
 						System.out.print(userID+"\t");
 						System.out.print(firstName+" ");
 						System.out.print(lastName);
-						
-											}
-					
-				
-																									} 
+					}
+				} 
 				catch (SQLException ex) {
-					
 						ex.printStackTrace();
+				}
+				Scanner activeScan = new Scanner(System.in);
+				System.out.println("Would you like to cancel this account?");
+				String cancelAccount = activeScan.nextLine();
+				if(cancelAccount.contentEquals("yes")) {
+					try (Connection connection = DriverManager.getConnection(url, username, password)){
+						Statement statement = connection.createStatement();
+						display = "UPDATE customers\n" + "SET status = 'Cancelled'\n" + "WHERE\n" + " bankID = "+activeUserID+";";
+					
+						statement.execute(display);
+						statement.close();
+																										} 
+					catch (SQLException ex) {
 						
-										}
+							ex.printStackTrace();
+							
+											}
+				}
+				System.out.println("\n\nWould you like view more active accounts?");
+				
+				viewMoreAccounts = activeScan.nextLine();
+			}
+			
+			if(allowedActiveActions==2) {
+				
+				System.out.println("Which User Account would you like to select");
+				int activeUserID = scanner.nextInt() ;
+				
+				int currentAccounts= 0;
+				ArrayList <Integer> accountNumbers = new ArrayList<Integer>();
+				
+				try (Connection connection = DriverManager.getConnection(url, username, password)){
+					Statement statement = connection.createStatement();
+					display = "select * from transactions where userid = "+activeUserID+"";
+				
+					boolean isResultSet = statement.execute(display);
+					
+					main_clearScreen();
+					if (isResultSet) {
+						ResultSet resultSet = statement.getResultSet();
+						ResultSetMetaData rsmd = resultSet.getMetaData();
+						System.out.print("TransactionID"+"\t");
+						System.out.print("TimeStamp"+"\t");
+						System.out.print("\t\t"+"Type"+"\t");
+						System.out.print("\t"+"Amount"+"\t");
+						System.out.print("\t"+"Account"+"\t");
+						System.out.println();
+						System.out.println();
+						while (resultSet.next()) {
+							
+							int transactionID = resultSet.getInt(1);
+							Timestamp time = resultSet.getTimestamp(2);
+							String type = resultSet.getString(3);
+							String amount = resultSet.getString(4);
+							int account = resultSet.getInt(5);
+							// Print Account Details
+							if(type.equalsIgnoreCase("Deposit")) {
+							System.out.print(transactionID+"\t");
+							System.out.print("\t"+time+"\t");
+							System.out.print(type+"\t");
+							System.out.print("\t"+amount);
+							System.out.print("\t\t"+account);
+							System.out.println();
+							System.out.println("------------------------------------------------------------------------------------------");
+							}
+							if(type.equalsIgnoreCase("Withdrawal")) {
+								System.out.print(transactionID);
+								System.out.print("\t"+time);
+								System.out.print("\t"+type+"\t");
+								System.out.print("\t"+amount);
+								System.out.print("\t"+account);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+							if(type.equalsIgnoreCase("Transfer")) {
+								System.out.print(transactionID);
+								System.out.print("\t"+time+"\t");
+								System.out.print("\t"+type+"\t");
+								System.out.print("\t"+amount);
+								System.out.print("\t"+account);
+								System.out.println();
+								System.out.println("--------------------------------------------------------------------------------");
+							}
+												}
+							resultSet.close();
+						}
+					
+					display = "select * from customers where bankID = "+activeUserID+"";
+					
+					
+					statement.execute(display);
+					
+					ResultSet resultSet = statement.getResultSet();
+					ResultSetMetaData rsmd = resultSet.getMetaData();
+					
+					while (resultSet.next()) {
+						String firstName = resultSet.getString(1);
+						String lastName = resultSet.getString(2);
+						int userID= resultSet.getInt(8);
+						int flength= firstName.length();
+						if (flength < 10) {
+							for(int i =0;i<=(10-flength);i++)
+								firstName= firstName + " ";
+						}
+
+						System.out.print("\nCurrently Viewing Transactions For: \t");
+						System.out.print(userID+"\t");
+						System.out.print(firstName+" ");
+						System.out.print(lastName);
+					}
+				} 
+				catch (SQLException ex) {
+						ex.printStackTrace();
+				}
 				System.out.println("\n\nWould you like view more active accounts?");
 				Scanner activeScan = new Scanner(System.in);
 				viewMoreAccounts = activeScan.nextLine();
 			}
-			
-			
-			if(allowedActiveActions==2) {
+			if(allowedActiveActions==3) {
 				viewMoreAccounts="no";
 			}
 			}
@@ -1019,8 +1273,8 @@ public class Bank {
 		String display;
 		main_clearScreen();
 		System.out.println("Into which Account would you like to make a deposit?\n");
-		for(int i=1;i<=availableAccounts.size();i++)
-			System.out.println(availableAccounts);
+		
+		System.out.println(availableAccounts);
 		
 		int depositAccountDecider = customerDecider.nextInt();
 		
@@ -1068,14 +1322,19 @@ public class Bank {
 				
 								}
 		System.out.println("How much would you like to deposit?");
+		
 		BigDecimal depositAmountDecider = customerDecider.nextBigDecimal();
 		
 		try (Connection connection = DriverManager.getConnection(url, username, password)){
 			Statement statement = connection.createStatement();
 			display = "UPDATE accounts SET balance= balance + "+depositAmountDecider+"WHERE accountid = "+depositAccountDecider+"";
 		
-			statement.execute(display);
+			statement.executeUpdate(display);
+			
+			String log = "INSERT INTO transactions(time, type, amount, account, userid)"
+						+"VALUES (NOW(),'Deposit',"+depositAmountDecider+","+depositAccountDecider+", "+userID+")";
 		
+			statement.execute(log);
 			statement.close();
 																							} 
 		catch (SQLException ex) {
@@ -1144,7 +1403,11 @@ public class Bank {
 			display = "UPDATE accounts SET balance= balance - "+withdrawalAmountDecider+"WHERE accountid = "+withdrawalAccountDecider+"";
 		
 			statement.execute(display);
-		
+			
+			String log = "INSERT INTO transactions(time, type, amount, account, userid)"
+					+"VALUES (NOW(),'Withdrawal',"+withdrawalAmountDecider+","+withdrawalAccountDecider+", '{"+userID+"}')";
+	
+			statement.execute(log);
 			statement.close();
 																							} 
 		catch (SQLException ex) {
